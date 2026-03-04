@@ -599,6 +599,33 @@ body {
   #moon, #moon-halo { top: 2%; right: 3%; }
 }
 
+/* ============================================================
+   MUSIC TOGGLE BUTTON
+   ============================================================ */
+#music-btn {
+  position: fixed;
+  bottom: clamp(16px, 3vh, 28px);
+  right: clamp(16px, 3vw, 28px);
+  z-index: 100;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(180,210,255,0.22);
+  background: rgba(5,13,34,0.72);
+  backdrop-filter: blur(12px);
+  color: var(--gold-soft);
+  font-size: 1.18rem;
+  cursor: none;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 18px rgba(228,198,96,0.1), 0 2px 12px rgba(0,0,0,0.4);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  animation: riseIn 2s ease 1.4s both;
+}
+#music-btn:hover {
+  border-color: rgba(228,198,96,0.5);
+  box-shadow: 0 0 32px rgba(228,198,96,0.25), 0 4px 18px rgba(0,0,0,0.4);
+  transform: scale(1.1);
+}
+
 /* Very short landscape screens (e.g. phone landscape) */
 @media (max-height: 500px) and (orientation: landscape) {
   #card { gap: 8px; }
@@ -715,7 +742,7 @@ body {
   <div id="card">
 
     <!-- Tagline -->
-    <h1 id="tagline">Jeam Abby Keith Panganiban</h1>
+    <h1 id="tagline">A Magical Evening Awaits…</h1>
 
     <!-- Ornamental divider top -->
     <div class="orn-row">
@@ -767,7 +794,7 @@ body {
 
     <!-- Password -->
     <div id="pw-wrap">
-      <p id="pw-hint">…or sabihin mo muna "please master" to enter now</p>
+      <p id="pw-hint">…or whisper the enchanted password to enter now</p>
       <div id="pw-field-wrap">
         <input
           type="password"
@@ -789,6 +816,10 @@ body {
   <p id="unlock-msg">✨ The magic has begun… ✨</p>
 </div>
 
+<!-- Music -->
+<audio id="bg-music" src="waltz.mp3" loop preload="auto"></audio>
+<button id="music-btn" onclick="toggleMusic()" title="Toggle music">🎵</button>
+
 <!-- ============================================================
      JAVASCRIPT
      ============================================================ -->
@@ -800,6 +831,38 @@ body {
   const CORRECT_PW     = 'abbybabycebby';   // ← change to your password
   const REDIRECT_TO    = 'main.html';
   const REDIRECT_DELAY = 2800;           // ms before redirect fires
+
+  /* ============================================================
+     BACKGROUND MUSIC
+     ============================================================ */
+  const music   = document.getElementById('bg-music');
+  const musicBtn = document.getElementById('music-btn');
+  let   musicMuted = false;
+
+  music.volume = 0.45;
+
+  // Autoplay on first interaction (browser policy)
+  function startMusic() {
+    music.play().catch(() => {});
+    document.removeEventListener('click',     startMusic);
+    document.removeEventListener('keydown',   startMusic);
+    document.removeEventListener('touchstart',startMusic);
+  }
+
+  // Try immediate autoplay
+  music.play().catch(() => {
+    // Blocked — wait for first user interaction
+    document.addEventListener('click',      startMusic, { once: true });
+    document.addEventListener('keydown',    startMusic, { once: true });
+    document.addEventListener('touchstart', startMusic, { once: true });
+  });
+
+  function toggleMusic() {
+    musicMuted = !musicMuted;
+    music.muted = musicMuted;
+    musicBtn.textContent = musicMuted ? '🔇' : '🎵';
+    if (!musicMuted) music.play().catch(() => {});
+  }
 
   /* ============================================================
      CURSOR TRAIL
@@ -984,7 +1047,7 @@ body {
     void pwInput.offsetWidth; // reflow
     pwInput.classList.add('wrong');
     pwInput.value = '';
-    errEl.textContent = "HAHAHAHAHAHA NYENYEENYEEE";
+    errEl.textContent = "That spell didn't work… try again.";
     setTimeout(() => { pwInput.classList.remove('wrong'); }, 500);
     setTimeout(() => { errEl.textContent = ''; }, 3500);
   }
