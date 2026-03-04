@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨ The Magic Awaits ✨</title>
+  <script>
+    // Midnight of March 5, 2026 in Philippine Time (UTC+8)
+    // That's March 4, 2026 at 16:00 UTC
+    const unlockTime = new Date("2026-03-04T16:00:00Z");
+    const now = new Date();
+
+    if (now >= unlockTime) {
+      window.location.replace("main.html");
+    } else {
+      window.location.replace("unlock.html");
+    }
+  </script>
+</head>
+<body></body>
+</html>
