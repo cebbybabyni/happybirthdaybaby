@@ -584,67 +584,7 @@ body::before {
     </div>
   </div>
 
-  <!-- WISHES MODAL -->
-  <div class="boxMail" id="boxWishes" role="dialog" aria-modal="true" aria-label="Birthday wishes">
-    <button class="boxMail__close" id="closeWishes" type="button" aria-label="Close wishes">
-      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-    </button>
-    <div class="boxMail-container wishes-modal">
-      <div class="card1" style="background:linear-gradient(160deg,#d5a6ff,#ff9abf);">
-        <div class="userImg">
-          <img src="./images/unnamed.png" alt="Profile" onerror="this.outerHTML='<div class=\'avatar-fallback\'>🌸</div>'">
-        </div>
-        <span class="username">Z</span>
-        <h3>Z</h3>
-        <span class="cute-img-left" aria-hidden="true"><img src="me.gif" alt="" style="width:clamp(60px,10vw,90px);border-radius:50%;"></span>
-      </div>
-      <div class="card2">
-        <div class="card2-inner">
-          <h3 style="color:#d5a6ff;">Z</h3>
-          <ul class="wish-list">
-            <li class="wish-item">🌸 Z</li>
-            <li class="wish-item">💫 Z</li>
-            <li class="wish-item">🌺 Z</li>
-            <li class="wish-item">🦋 Z</li>
-            <li class="wish-item">🎂 Z</li>
-            <li class="wish-item">🌟 Z</li>
-            <li class="wish-item">💖 Z</li>
-          </ul>
-          <div class="cute-img-right show" style="margin-top:0.75rem;" aria-hidden="true">💜✨🌸💫🎀</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- MEMORIES MODAL -->
-  <div class="boxMail" id="boxMemories" role="dialog" aria-modal="true" aria-label="Our moments together">
-    <button class="boxMail__close" id="closeMemories" type="button" aria-label="Close memories">
-      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-    </button>
-    <div class="boxMail-container memories-modal">
-      <div class="card1" style="background:linear-gradient(160deg,#ffb347,#ff9abf);">
-        <div class="userImg">
-          <img src="./images/unnamed.png" alt="Profile" onerror="this.outerHTML='<div class=\'avatar-fallback\'>🌸</div>'">
-        </div>
-        <span class="username">Z</span>
-        <h3>Z</h3>
-        <span class="cute-img-left" aria-hidden="true"><img src="me.gif" alt="" style="width:clamp(60px,10vw,90px);border-radius:50%;"></span>
-      </div>
-      <div class="card2">
-        <div class="card2-inner">
-          <h3 style="color:#ffb347;">Z</h3>
-          <ol class="memory-timeline">
-            <li class="memory-entry"><span class="mem-icon" aria-hidden="true">🌱</span><div>Z</div></li>
-            <li class="memory-entry"><span class="mem-icon" aria-hidden="true">💬</span><div>Z</div></li>
-            <li class="memory-entry"><span class="mem-icon" aria-hidden="true">🤝</span><div>Z</div></li>
-            <li class="memory-entry"><span class="mem-icon" aria-hidden="true">😂</span><div>Z</div></li>
-            <li class="memory-entry"><span class="mem-icon" aria-hidden="true">💕</span><div>Z</div></li>
-          </ol>
-          <div class="cute-img-right show" style="margin-top:0.75rem;" aria-hidden="true">🌻🎈💖✨📸</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <img src="./images/decorate.png" alt="" class="decorate-rainbow" aria-hidden="true">
 
@@ -694,15 +634,15 @@ body::before {
 /* ── LETTER MODAL ── */
 (function(){
   const chapters=[
-    {leftTitle:'Z',leftEmoji:'<img src="me.gif" alt="" style="width:clamp(60px,10vw,90px);border-radius:50%;">',title:'To You... 💌',
+    {leftTitle:'Z',leftEmoji:'<img src="me.gif" alt="" style="width:clamp(60px,10vw,90px);border-radius:50%;">',title:'💌',
+     text:"A",
+     emoji:'🎂',typed:true},
+    {leftTitle:'Z',leftEmoji:'<img src="me.gif" alt="" style="width:clamp(60px,10vw,90px);border-radius:50%;">',title:'💕',
+     text:"B",
+     emoji:'🌸',typed:false},
+    {leftTitle:'Z',leftEmoji:'<img src="me.gif" alt="" style="width:clamp(60px,10vw,90px);border-radius:50%;">',title:'✨',
      text:"Z",
-     emoji:'🎂✨💖',typed:true},
-    {leftTitle:'Z',leftEmoji:'<img src="me.gif" alt="" style="width:clamp(60px,10vw,90px);border-radius:50%;">',title:'A Promise For You 💕',
-     text:"Z",
-     emoji:'💜🌸',typed:false},
-    {leftTitle:'Z',leftEmoji:'<img src="me.gif" alt="" style="width:clamp(60px,10vw,90px);border-radius:50%;">',title:'My Wish for You ✨',
-     text:"Z",
-     emoji:'🌟💫🎀',typed:false}
+     emoji:'🌟',typed:false}
   ];
 
   const imgBtn=document.getElementById('btn__letter');
