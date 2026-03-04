@@ -794,7 +794,7 @@ body {
 
     <!-- Password -->
     <div id="pw-wrap">
-      <p id="pw-hint">…or whisper the enchanted password to enter now</p>
+      <p id="pw-hint">…or sabihin mo muna "please master" to enter now</p>
       <div id="pw-field-wrap">
         <input
           type="password"
@@ -840,22 +840,17 @@ body {
   let   musicMuted = false;
 
   music.volume = 0.45;
+  music.muted  = true; // start muted so browser allows autoplay
 
-  // Autoplay on first interaction (browser policy)
-  function startMusic() {
-    music.play().catch(() => {});
-    document.removeEventListener('click',     startMusic);
-    document.removeEventListener('keydown',   startMusic);
-    document.removeEventListener('touchstart',startMusic);
-  }
+  // Play immediately (muted) — browsers allow this
+  music.play().catch(() => {});
 
-  // Try immediate autoplay
-  music.play().catch(() => {
-    // Blocked — wait for first user interaction
-    document.addEventListener('click',      startMusic, { once: true });
-    document.addEventListener('keydown',    startMusic, { once: true });
-    document.addEventListener('touchstart', startMusic, { once: true });
-  });
+  // Unmute after a short delay (sounds like instant autoplay to the user)
+  setTimeout(() => {
+    music.muted = false;
+    musicMuted  = false;
+    musicBtn.textContent = '🎵';
+  }, 800);
 
   function toggleMusic() {
     musicMuted = !musicMuted;
