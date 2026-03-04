@@ -496,42 +496,65 @@ body {
 /* ============================================================
    UNLOCK OVERLAY
    ============================================================ */
+/* ============================================================
+   FAIRY DUST WIND UNLOCK OVERLAY
+   ============================================================ */
 #unlock-veil {
   position: fixed; inset: 0; z-index: 800;
   display: none;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(
-    circle at center,
-    rgba(180,220,255,0.97) 0%,
-    rgba(140,190,255,0.89) 35%,
-    rgba(80,140,240,0.65) 65%,
-    rgba(20,50,120,0.38) 100%
-  );
-  animation: veilIn 0.7s ease forwards;
+  background: transparent;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-@keyframes veilIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* Canvas for fairy dust particles */
+#fairy-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
 }
 
-#unlock-msg {
+/* Soft glow overlay that brightens at the end */
+#fairy-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center,
+    rgba(200,230,255,0.0) 0%,
+    rgba(180,220,255,0.0) 60%,
+    transparent 100%);
+  opacity: 0;
+  transition: none;
+  pointer-events: none;
+  animation: none;
+}
+
+/* Magical message */
+#fairy-msg {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
   font-family: 'Great Vibes', cursive;
-  font-size: clamp(2.2rem, 7vw, 5rem);
-  color: #040a1e;
-  text-shadow:
-    0 0 24px rgba(255,255,255,0.9),
-    0 2px 8px rgba(0,0,0,0.18);
+  font-size: clamp(2.2rem, 7vw, 4.5rem);
+  color: #fff;
   text-align: center;
-  padding: 20px 32px;
-  animation: msgPop 0.9s ease 0.2s both;
+  white-space: nowrap;
+  text-shadow:
+    0 0 20px rgba(180,220,255,1),
+    0 0 50px rgba(140,200,255,0.8),
+    0 0 90px rgba(100,180,255,0.5);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
 }
 
-@keyframes msgPop {
-  0%   { opacity: 0; transform: scale(0.6) translateY(20px); }
-  60%  { transform: scale(1.07) translateY(-5px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+/* Final white fade */
+#fairy-fade {
+  position: absolute; inset: 0;
+  background: #f0f6ff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
 }
 
 /* ============================================================
@@ -811,9 +834,12 @@ body {
   </div>
 </div>
 
-<!-- Unlock overlay -->
+<!-- Unlock overlay — Fairy Dust Wind -->
 <div id="unlock-veil">
-  <p id="unlock-msg">✨ The magic has begun… ✨</p>
+  <canvas id="fairy-canvas"></canvas>
+  <div id="fairy-glow"></div>
+  <p id="fairy-msg">✨ The magic has begun… ✨</p>
+  <div id="fairy-fade"></div>
 </div>
 
 <!-- Music -->
@@ -830,7 +856,7 @@ body {
   const UNLOCK_TIME    = new Date('2026-03-05T00:00:00+08:00').getTime();
   const CORRECT_PW     = 'abbybabycebby';   // ← change to your password
   const REDIRECT_TO    = 'main.html';
-  const REDIRECT_DELAY = 2800;           // ms before redirect fires
+  const REDIRECT_DELAY = 3900;           // ms before redirect fires (fairy dust engine handles timing)
 
   /* ============================================================
      BACKGROUND MUSIC
@@ -1048,66 +1074,241 @@ body {
   }
 
   /* ============================================================
-     UNLOCK SEQUENCE
+     UNLOCK SEQUENCE — FAIRY DUST WIND
      ============================================================ */
   let unlocked = false;
 
   function triggerUnlock(source) {
     if (unlocked) return;
     unlocked = true;
-
     clearInterval(countdownTimer);
     playChime();
 
-    // Burst explosions
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    spawnBurst(cx, cy, 120);
-    setTimeout(() => spawnBurst(80,                    cy * 0.7,  40), 260);
-    setTimeout(() => spawnBurst(window.innerWidth-80,  cy * 0.7,  40), 420);
-    setTimeout(() => spawnBurst(cx * 0.4,              cy * 1.3,  28), 540);
-    setTimeout(() => spawnBurst(cx * 1.6,              cy * 1.3,  28), 660);
+    // 1. Fade out timer + page content
+    const page = document.getElementById('page');
+    page.style.transition = 'opacity 0.5s ease';
+    page.style.opacity = '0';
 
-    // Show overlay
-    const veil = document.getElementById('unlock-veil');
-    veil.style.display = 'flex';
-
-    // Redirect
-    setTimeout(() => { window.location.href = REDIRECT_TO; }, REDIRECT_DELAY);
+    // 2. Show veil and start fairy dust after brief pause
+    setTimeout(() => {
+      const veil = document.getElementById('unlock-veil');
+      veil.style.display = 'flex';
+      startFairyDust();
+    }, 400);
   }
 
   /* ============================================================
-     BURST SPAWNER
+     FAIRY DUST ENGINE
      ============================================================ */
-  const burstColors = [
-    '#f4e098','#c4d8f8','#f0d0e8',
-    '#ffffff','#a8d8ff','#ffc8e0','#d0f0d0','#ffe4a0'
-  ];
+  function startFairyDust() {
+    const canvas = document.getElementById('fairy-canvas');
+    const ctx    = canvas.getContext('2d');
+    const glow   = document.getElementById('fairy-glow');
+    const msg    = document.getElementById('fairy-msg');
+    const fade   = document.getElementById('fairy-fade');
 
-  function spawnBurst(cx, cy, count) {
-    for (let i = 0; i < count; i++) {
-      const el    = document.createElement('div');
-      el.className = 'burst-dot';
-      const angle  = Math.random() * Math.PI * 2;
-      const dist   = 60 + Math.random() * 350;
-      const sz     = 5 + Math.random() * 13;
-      const color  = burstColors[Math.floor(Math.random() * burstColors.length)];
-      const dur    = (0.55 + Math.random() * 0.9).toFixed(2) + 's';
-      const delay  = (Math.random() * 0.3).toFixed(2) + 's';
-      el.style.cssText = `
-        left:${cx}px; top:${cy}px;
-        width:${sz}px; height:${sz}px;
-        background:radial-gradient(circle, ${color} 0%, transparent 100%);
-        box-shadow:0 0 8px 3px ${color}99;
-        border-radius:${Math.random()>0.45?'50%':'3px'};
-        --bx:${(Math.cos(angle)*dist).toFixed(1)}px;
-        --by:${(Math.sin(angle)*dist).toFixed(1)}px;
-        --bd:${dur};
-        --bdl:${delay};
-      `;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 1600);
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const W = canvas.width;
+    const H = canvas.height;
+
+    // Particle colors — soft white, light blue, silver
+    const COLORS = [
+      'rgba(255,255,255,',
+      'rgba(200,230,255,',
+      'rgba(180,215,255,',
+      'rgba(220,240,255,',
+      'rgba(210,225,255,',
+      'rgba(240,248,255,',
+    ];
+
+    // Particle pool
+    const particles = [];
+    let   elapsed   = 0;
+    let   rafId     = null;
+    const START_TIME = performance.now();
+    const WIND_DUR   = 2800; // ms fairy dust blows
+    const MSG_AT     = 2200; // ms show message
+    const FADE_AT    = 3200; // ms white fade starts
+    const REDIRECT_AT = 3900;
+
+    class FairyParticle {
+      constructor(spawnDelay) {
+        this.reset(spawnDelay);
+      }
+      reset(delay) {
+        // Start from left edge with slight vertical randomness
+        this.x     = -10 - Math.random() * 80;
+        this.y     = Math.random() * H;
+        this.delay = delay || 0;
+        this.active = false;
+
+        // Speed — wind from left to right
+        this.vx    = 2.5 + Math.random() * 3.5;
+        this.vy    = (Math.random() - 0.5) * 0.8;
+
+        // Swirl oscillation
+        this.swirlAmp   = 0.4 + Math.random() * 1.2;
+        this.swirlFreq  = 0.02 + Math.random() * 0.04;
+        this.swirlOffset= Math.random() * Math.PI * 2;
+        this.tick        = 0;
+
+        // Size & appearance
+        const isStar = Math.random() > 0.55;
+        this.isStar  = isStar;
+        this.r       = isStar ? 1.5 + Math.random() * 3.5 : 1 + Math.random() * 2.5;
+        this.color   = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+        // Life
+        this.life    = 0;
+        this.maxLife = (W / this.vx) * (0.9 + Math.random() * 0.4);
+        this.pulse   = Math.random() * Math.PI * 2;
+        this.pulseSpeed = 0.06 + Math.random() * 0.08;
+      }
+
+      update(dt) {
+        if (!this.active) return;
+        this.tick++;
+        this.life++;
+        // Wind movement
+        this.x += this.vx;
+        // Swirl upward slightly
+        this.y += this.vy + Math.sin(this.tick * this.swirlFreq + this.swirlOffset) * this.swirlAmp;
+        this.y -= 0.18; // gentle upward drift
+        this.pulse += this.pulseSpeed;
+      }
+
+      draw() {
+        if (!this.active) return;
+        const prog    = this.life / this.maxLife;
+        const fadeIn  = Math.min(prog / 0.12, 1);
+        const fadeOut = prog > 0.75 ? 1 - (prog - 0.75) / 0.25 : 1;
+        const alpha   = fadeIn * fadeOut * (0.6 + 0.4 * Math.abs(Math.sin(this.pulse)));
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        if (this.isStar) {
+          // Draw 4-point star sparkle
+          ctx.shadowColor = this.color + '1)';
+          ctx.shadowBlur  = 8;
+          ctx.fillStyle   = this.color + '1)';
+          const r = this.r;
+          ctx.beginPath();
+          for (let i = 0; i < 8; i++) {
+            const angle  = (i / 8) * Math.PI * 2;
+            const radius = i % 2 === 0 ? r : r * 0.38;
+            i === 0
+              ? ctx.moveTo(this.x + radius * Math.cos(angle), this.y + radius * Math.sin(angle))
+              : ctx.lineTo(this.x + radius * Math.cos(angle), this.y + radius * Math.sin(angle));
+          }
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          // Glowing dot
+          const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 2.2);
+          grad.addColorStop(0,   this.color + '1)');
+          grad.addColorStop(0.4, this.color + '0.6)');
+          grad.addColorStop(1,   this.color + '0)');
+          ctx.fillStyle  = grad;
+          ctx.shadowColor = this.color + '0.8)';
+          ctx.shadowBlur  = 6;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+
+        // Recycle if off-screen or life spent
+        if (this.x > W + 20 || this.life >= this.maxLife || this.y < -20 || this.y > H + 20) {
+          this.active = false;
+        }
+      }
     }
+
+    // Pre-create pool
+    const POOL_SIZE = Math.min(600, Math.floor(W / 2.2));
+    for (let i = 0; i < POOL_SIZE; i++) {
+      particles.push(new FairyParticle(0));
+    }
+
+    // Spawn rate ramps up over time
+    let lastSpawn = 0;
+
+    function getSpawnInterval(t) {
+      // Starts slow (~80ms), ramps down to ~8ms for a dense wave
+      const progress = Math.min(t / WIND_DUR, 1);
+      return 80 - progress * 72;
+    }
+
+    function getIdleParticle() {
+      return particles.find(p => !p.active) || null;
+    }
+
+    function spawnWave(t) {
+      const interval = getSpawnInterval(t);
+      if (t - lastSpawn < interval) return;
+      lastSpawn = t;
+
+      // Spawn 1-4 particles per frame depending on progress
+      const progress = Math.min(t / WIND_DUR, 1);
+      const count    = 1 + Math.floor(progress * 5);
+      for (let i = 0; i < count; i++) {
+        const p = getIdleParticle();
+        if (!p) break;
+        p.reset(0);
+        p.y = Math.random() * H; // spread vertically
+        p.active = true;
+      }
+    }
+
+    // Glow overlay ramps up
+    function updateGlow(t) {
+      const prog = Math.min(t / WIND_DUR, 1);
+      const a    = prog * prog * 0.55;
+      glow.style.background = `radial-gradient(ellipse at center,
+        rgba(200,230,255,${a}) 0%,
+        rgba(180,215,255,${a * 0.5}) 55%,
+        transparent 100%)`;
+    }
+
+    // Animate loop
+    function loop(now) {
+      const t = now - START_TIME;
+      ctx.clearRect(0, 0, W, H);
+
+      if (t < WIND_DUR) {
+        spawnWave(t);
+      }
+
+      particles.forEach(p => { p.update(); p.draw(); });
+      updateGlow(t);
+
+      // Show message
+      if (t >= MSG_AT && msg.style.opacity !== '1') {
+        msg.style.transition = 'opacity 0.7s ease';
+        msg.style.opacity    = '1';
+      }
+
+      // White fade-out
+      if (t >= FADE_AT) {
+        const fadeProgress = Math.min((t - FADE_AT) / 700, 1);
+        fade.style.opacity = fadeProgress;
+      }
+
+      // Redirect
+      if (t >= REDIRECT_AT) {
+        cancelAnimationFrame(rafId);
+        window.location.href = REDIRECT_TO;
+        return;
+      }
+
+      rafId = requestAnimationFrame(loop);
+    }
+
+    rafId = requestAnimationFrame(loop);
   }
 
   /* ============================================================
@@ -1153,4 +1354,3 @@ body {
 </script>
 </body>
 </html>
-
